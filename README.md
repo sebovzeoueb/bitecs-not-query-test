@@ -1,6 +1,12 @@
 # bitecs-not-query-test
 Demonstration of a potential bug with bitECS query system
 
+## UPDATE
+
+Leaving this up here for future reference if someone is struggling with the same problem. It appears this isn't really a bug, but a consequence of entity removal being updated at the end of a system execution. The solution is to either use 2 systems or call `commitRemovals` in between the queries.
+
+## How to run
+
 - open index.html
 - open dev console
 
