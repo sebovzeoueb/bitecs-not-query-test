@@ -704,10 +704,12 @@
   // src/index.js
   console.log("Testing bitECS queries");
   var ComponentA = defineComponent();
+  var world = createWorld();
+  var eid = addEntity(world);
   var hasA = defineQuery([ComponentA]);
   var doesntHaveA = defineQuery([Not(ComponentA)]);
-  var prevHas;
-  var prevDoesnt;
+  var prevHasA;
+  var prevDoesntA;
   var systemA = defineSystem((world2) => {
     hasA(world2).forEach((eid2) => {
       removeComponent(world2, ComponentA, eid2);
@@ -719,15 +721,30 @@
     });
     const has = hasA(world2).length;
     const doesnt = doesntHaveA(world2).length;
-    if (prevHas !== has || prevDoesnt !== doesnt) {
-      console.log(`${has} entities have A, ${doesnt} entities don't have A`);
+    if (prevHasA !== has || prevDoesntA !== doesnt) {
+      console.log(`systemA: ${has} entities have A, ${doesnt} entities don't have A`);
     }
-    prevHas = has;
-    prevDoesnt = doesnt;
+    prevHasA = has;
+    prevDoesntA = doesnt;
   });
-  var world = createWorld();
-  var pipeline = pipe([systemA]);
-  var eid = addEntity(world);
+  var prevEntHas;
+  var prevHasB;
+  var prevDoesntB;
+  var systemB = defineSystem((world2) => {
+    const entHas = hasComponent(world2, ComponentA, eid);
+    if (prevEntHas !== entHas) {
+      console.log(`systemB: entity has Component A: ${entHas}`);
+    }
+    const has = hasA(world2).length;
+    const doesnt = doesntHaveA(world2).length;
+    if (prevHasB !== has || prevDoesntB !== doesnt) {
+      console.log(`systemB: ${has} entities have A, ${doesnt} entities don't have A`);
+    }
+    prevHasB = has;
+    prevDoesntB = doesnt;
+    prevEntHas = entHas;
+  });
+  var pipeline = pipe([systemA, systemB]);
   var lastTime = performance.now();
   world.time = {};
   var tick = () => {
